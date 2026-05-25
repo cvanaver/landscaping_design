@@ -19,16 +19,15 @@ COST: ~$0.05 per megapixel.
   A 1500×1100 photo (~1.6MP) = $0.08 per render.
   Default config below renders 4 variations = ~$0.32 total.
 
-MAKING THE MASK (one-time, 2-min job in Mac Preview):
-  1. Open hero.jpg in Preview
-  2. File → Duplicate
-  3. Tools → Adjust Color → drag brightness all the way down (image goes black)
-  4. Use Markup → rectangle/freehand selection
-  5. Set fill color to WHITE
-  6. Draw a white shape over the strip of grass along the fence (where the bed will go)
-  7. Export as mask.png
-  Alternative: use Photoshop, GIMP, Pixelmator, or any image editor.
+MAKING THE MASK (one-time, 2-min job):
+  Use make_mask.py in this directory (interactive painter).
+  Alternative: Mac Preview, Photoshop, GIMP, Pixelmator — any image editor.
   The mask must be the SAME PIXEL DIMENSIONS as hero.jpg.
+
+PROMPTS:
+  The PROMPTS list below reflects the v2 design (geraniums under the pear,
+  Echinacea everywhere else, no Goldsturm option). If the design changes,
+  edit the PROMPTS list — that's where all the plant-language lives.
 """
 
 import os
@@ -57,21 +56,40 @@ NUM_IMAGES_PER_PROMPT = 1   # set to 2-4 for more variations per prompt
 
 # Base scene description — fence/tree preservation language is critical
 PRESERVE_CLAUSE = (
-    "Keep the existing wood privacy fence with lattice top, mature tree, "
+    "Keep the existing wood privacy fence with lattice top, mature pear tree, "
     "lawn, climbing dome, and house exactly as in the source image. "
     "Only modify the masked strip of grass directly along the fence."
 )
 
+# Shared phrasing for the v2 plant palette
+ECHINACEA_DESCRIPTION = (
+    "front row of purple coneflowers (Echinacea purpurea), pink-purple "
+    "daisy blooms on 30-inch stems, spaced 14 inches apart along a "
+    "straight front bed edge"
+)
+
+KARL_FOERSTER_DESCRIPTION = (
+    "back row of Karl Foerster feather reed grass, 4-foot tall upright "
+    "ornamental grasses with vertical green-gold blades and tan plumes, "
+    "spaced 32 inches apart, 6 inches off the fence, in the north and "
+    "south alcove sections only"
+)
+
+GERANIUM_DESCRIPTION = (
+    "under the pear canopy at the north end, a low mat of "
+    "Geranium macrorrhizum (Bigroot cranesbill), scalloped green foliage "
+    "with small magenta flowers, 10 inches tall, replacing coneflowers "
+    "in the shaded zone"
+)
+
 PROMPTS = [
     {
-        "name": "echinacea_golden_hour",
+        "name": "summer_golden_hour",
         "prompt": (
-            "A 30-inch deep planting bed along an existing wood fence. "
-            "Back row: Karl Foerster feather reed grass, 4-foot tall upright "
-            "ornamental grasses with vertical green-gold blades and tan plumes, "
-            "spaced 32 inches apart, 6 inches off the fence. "
-            "Front row: purple coneflowers (Echinacea purpurea), pink-purple "
-            "daisy blooms on 30-inch stems, spaced 14 inches apart. "
+            "A planting bed along an existing wood fence with a straight front edge. "
+            f"{KARL_FOERSTER_DESCRIPTION}. "
+            f"A continuous {ECHINACEA_DESCRIPTION}. "
+            f"{GERANIUM_DESCRIPTION}. "
             "Shredded dark hardwood mulch ground cover, clean straight bed edge. "
             "Late July, peak summer bloom, warm golden hour evening light, "
             "long shadows, photorealistic residential backyard, "
@@ -80,13 +98,12 @@ PROMPTS = [
         ),
     },
     {
-        "name": "echinacea_midday",
+        "name": "summer_midday",
         "prompt": (
-            "A 30-inch deep planting bed along an existing wood fence. "
-            "Back row: Karl Foerster feather reed grass, 4-foot tall upright "
-            "ornamental grasses with vertical green-gold blades and tan plumes. "
-            "Front row: purple coneflowers (Echinacea purpurea), pink-purple "
-            "daisy blooms on 30-inch stems. "
+            "A planting bed along an existing wood fence with a straight front edge. "
+            f"{KARL_FOERSTER_DESCRIPTION}. "
+            f"A continuous {ECHINACEA_DESCRIPTION}. "
+            f"{GERANIUM_DESCRIPTION}. "
             "Shredded dark hardwood mulch ground cover. "
             "Mid-July midday, bright natural daylight, slight cloud cover, "
             "photorealistic residential backyard, high detail. "
@@ -94,32 +111,31 @@ PROMPTS = [
         ),
     },
     {
-        "name": "goldsturm_golden_hour",
+        "name": "late_spring_geranium_bloom",
         "prompt": (
-            "A 30-inch deep planting bed along an existing wood fence. "
-            "Back row: Karl Foerster feather reed grass, 4-foot tall upright "
-            "ornamental grasses with vertical green-gold blades and tan plumes, "
-            "spaced 32 inches apart, 6 inches off the fence. "
-            "Front row: Rudbeckia fulgida 'Goldsturm', bright gold-yellow "
-            "black-eyed Susan blooms with dark chocolate centers on 24-inch "
-            "stems, spaced 14 inches apart. "
-            "Shredded dark hardwood mulch ground cover, clean straight bed edge. "
-            "Late July, peak summer bloom, warm golden hour evening light, "
-            "photorealistic residential backyard, professional landscape "
-            "photography, sharp focus, high detail. "
+            "A planting bed along an existing wood fence with a straight front edge. "
+            f"{KARL_FOERSTER_DESCRIPTION}, just emerging green plumes. "
+            "Coneflowers in the front row not yet blooming, just green foliage. "
+            f"Under the pear canopy, a low mat of Geranium macrorrhizum in full "
+            "magenta-pink bloom, the showcase plant of this season. "
+            "Pear tree in late spring foliage. "
+            "Shredded dark hardwood mulch ground cover. "
+            "Late May, morning light, photorealistic residential backyard. "
             + PRESERVE_CLAUSE
         ),
     },
     {
-        "name": "goldsturm_midday",
+        "name": "autumn_seedheads",
         "prompt": (
-            "A 30-inch deep planting bed along an existing wood fence. "
-            "Back row: Karl Foerster feather reed grass with tan plumes. "
-            "Front row: Rudbeckia fulgida 'Goldsturm', bright gold-yellow "
-            "black-eyed Susan blooms with dark centers. "
+            "A planting bed along an existing wood fence with a straight front edge. "
+            f"{KARL_FOERSTER_DESCRIPTION}, plumes turned wheat-tan. "
+            "Coneflowers (Echinacea purpurea) with spent black seedheads on dried stems, "
+            "structural and architectural, no remaining petals. "
+            "Under the pear canopy, Geranium macrorrhizum foliage flushed red-bronze. "
+            "Pear tree in autumn foliage with some leaves on the ground. "
             "Shredded dark hardwood mulch ground cover. "
-            "Mid-July midday, bright natural daylight, slight cloud cover, "
-            "photorealistic residential backyard, high detail. "
+            "Mid-October, golden afternoon light, photorealistic residential backyard, "
+            "high detail. "
             + PRESERVE_CLAUSE
         ),
     },
