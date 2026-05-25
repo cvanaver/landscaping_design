@@ -60,12 +60,22 @@ def main():
 
     hero_display = hero.resize((display_w, display_h), Image.LANCZOS)
 
-    # Create mask canvas at FULL resolution (will save at original res)
-    mask = Image.new("L", (W, H), 0)
+    # Create mask canvas at FULL resolution (will save at original res).
+    # If mask.png already exists at matching dimensions, load it as the starting point.
+    if MASK_PATH.exists():
+        existing = Image.open(MASK_PATH).convert("L")
+        if existing.size == (W, H):
+            mask = existing.copy()
+            print(f"Loaded existing {MASK_PATH} as starting point.")
+        else:
+            mask = Image.new("L", (W, H), 0)
+            print(f"Existing {MASK_PATH} dimensions don't match — starting blank.")
+    else:
+        mask = Image.new("L", (W, H), 0)
     mask_draw = ImageDraw.Draw(mask)
 
-    # Display version of mask for overlay
-    mask_display = Image.new("L", (display_w, display_h), 0)
+    # Display version of mask for overlay (downscaled from full-res mask)
+    mask_display = mask.resize((display_w, display_h), Image.LANCZOS)
     mask_display_draw = ImageDraw.Draw(mask_display)
 
     # State
